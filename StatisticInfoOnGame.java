@@ -2,6 +2,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
+
+/**
+ * The StatisticInfoOnGame class keeps track of various statistics during the gameplay, including moves, kills, distances, and positions.
+ */
 public class StatisticInfoOnGame {
 
     private  static  final String attackers_side = "A";
@@ -12,6 +16,9 @@ public class StatisticInfoOnGame {
     private PieceStatistcs[] attackers_stats;
     private ArrayList<PositionStats> positions;
 
+
+
+    // Comparators for sorting statistics
     private Comparator<PieceStatistcs> distancecompare = new Comparator<PieceStatistcs>() {
         @Override
         public int compare(PieceStatistcs o1, PieceStatistcs o2) {
@@ -59,6 +66,9 @@ public class StatisticInfoOnGame {
          }
      };
 
+    /**
+     * Constructor to initialize the StatisticInfoOnGame object with initial statistics.
+     */
     public StatisticInfoOnGame(){
         this.positions = new ArrayList<PositionStats>();
         this.attackers_stats = new PieceStatistcs[24];
@@ -75,6 +85,13 @@ public class StatisticInfoOnGame {
         }
 
     }
+
+
+    /**
+     * Adds a ConcretePiece to the statistics associated with a specific position on the game board.
+     * @param cp - The ConcretePiece to be added.
+     * @param pos - The position on the game board.
+     */
     public  void addPieceToPos(ConcretePiece cp,Position pos){
         PositionStats ps = find(pos);
         if(ps != null){
@@ -96,6 +113,12 @@ public class StatisticInfoOnGame {
         return null;
     }
 
+
+    /**
+     * Generates a string with various game statistics, including moves, kills, distances, and positions.
+     * @param isattackerwin - A boolean indicating if the attackers won the game.
+     * @return String - A formatted string containing game statistics.
+     */
     public String PrintGameStats(boolean isattackerwin){
         String text="";
 
@@ -123,10 +146,18 @@ public class StatisticInfoOnGame {
 
         return  text;
     }
+
+
+    /**
+     * Generates a string representation of piece moves, sorted by the number of moves in ascending order.
+     * @param arr - Array of PieceStatistcs to be printed.
+     * @return String - Formatted string containing piece moves.
+     */
     private String printMoves(PieceStatistcs[] arr){
         StringBuilder text = new StringBuilder();
         Arrays.sort(arr,numStepscompare);
         for (int i = 0; i < arr.length; i++) {
+            // Check if the piece has made any moves
             if(arr[i].getNumOfMoves()>0)
             {
                 text.append(arr[i].printId());
@@ -138,6 +169,12 @@ public class StatisticInfoOnGame {
         return text.toString();
     }
 
+
+    /**
+     * Generates a string representation of piece kills, sorted by the number of kills in descending order.
+     * @param isattackerwin - A boolean indicating if the attackers won the game.
+     * @return String - Formatted string containing piece kills.
+     */
     private  String printKills(boolean isattackerwin){
         StringBuilder text = new StringBuilder();
         Arrays.sort(defenders_stats,killscompare.reversed());
@@ -147,12 +184,14 @@ public class StatisticInfoOnGame {
         while (d<defenders_stats.length && a < attackers_stats.length){
             comp = killscompare.compare(defenders_stats[d],attackers_stats[a]);
                 if((comp==0 && isattackerwin) || comp<0){
+                    // Check if the attacker piece has made any kills
                     if(attackers_stats[a].getKills()>0){
                         text.append(attackers_stats[a].printKills());
                         text.append("\n");
                     }
                     a+=1;
                 }else {
+                    // Check if the defender piece has made any kills
                     if(defenders_stats[d].getKills()>0){
                         text.append(defenders_stats[d].printKills());
                         text.append("\n");
@@ -161,7 +200,7 @@ public class StatisticInfoOnGame {
 
                 }
         }
-
+        // Add remaining defender kills
         while (d<defenders_stats.length){
             if(defenders_stats[d].getKills()>0){
                 text.append(defenders_stats[d].printKills());
@@ -169,7 +208,7 @@ public class StatisticInfoOnGame {
             }
             d+=1;
         }
-
+        // Add remaining attacker kills
         while (a < attackers_stats.length){
             if(attackers_stats[a].getKills()>0){
                 text.append(attackers_stats[a].printKills());
@@ -180,6 +219,12 @@ public class StatisticInfoOnGame {
         return text.toString();
     }
 
+
+    /**
+     * Generates a string representation of piece distances, sorted by the distance in descending order.
+     * @param isattackerwin - A boolean indicating if the attackers won the game.
+     * @return String - Formatted string containing piece distances.
+     */
     private String printDistance(boolean isattackerwin){
         StringBuilder text = new StringBuilder();
         Arrays.sort(defenders_stats,distancecompare.reversed());
@@ -189,12 +234,14 @@ public class StatisticInfoOnGame {
         while (d<defenders_stats.length && a < attackers_stats.length){
             comp = distancecompare.compare(defenders_stats[d],attackers_stats[a]);
             if((comp==0 && isattackerwin) || comp<0){
+                // Check if the attacker piece has covered any distance
                 if(attackers_stats[a].getDistance()>0){
                     text.append(attackers_stats[a].printDistance());
                     text.append("\n");
                 }
                 a+=1;
             }else {
+                // Check if the defender piece has covered any distance
                 if(defenders_stats[d].getDistance()>0){
                     text.append(defenders_stats[d].printDistance());
                     text.append("\n");
@@ -203,7 +250,7 @@ public class StatisticInfoOnGame {
 
             }
         }
-
+        // Add remaining defender distances
         while (d<defenders_stats.length){
             if(defenders_stats[d].getDistance()>0){
                 text.append(defenders_stats[d].printDistance());
@@ -211,7 +258,7 @@ public class StatisticInfoOnGame {
             }
             d+=1;
         }
-
+        // Add remaining attacker distances
         while (a < attackers_stats.length){
             if(attackers_stats[a].getDistance()>0){
                 text.append(attackers_stats[a].printDistance());
@@ -221,12 +268,20 @@ public class StatisticInfoOnGame {
         }
         return text.toString();
     }
+
+
+    /**
+     * Generates a string representation of steps on each position, sorted by the number of pieces on a position in descending order.
+     * @return String - Formatted string containing steps on positions.
+     */
     private String printStepsOnPosition(){
         StringBuilder text = new StringBuilder();
         positions.sort(positionnumstepscompare.reversed());
 
         for (int i = 0; i < positions.size(); i++) {
             if(positions.get(i).getNumOfPieces()<2){
+                // Check if the position has at least two pieces that stepped on it.
+
                 i = positions.size();
             }else{
                 text.append(positions.get(i).printPieceSteps());
@@ -236,6 +291,13 @@ public class StatisticInfoOnGame {
         return text.toString();
     }
 
+
+    /**
+     * Retrieves the PieceStatistcs for a specific piece based on its owner (attackers/defenders) and ID.
+     * @param attackers - A boolean indicating if the piece belongs to attackers.
+     * @param id - The ID of the piece.
+     * @return PieceStatistcs - The statistics for the specified piece.
+     */
     public  PieceStatistcs getPieceStatistics(boolean attackers, int id){
         if(attackers){
             return this.attackers_stats[id-1];
@@ -251,6 +313,13 @@ public class StatisticInfoOnGame {
             cur.addMove(to);
         }
     }
+
+
+    /**
+     * Adds a kill to the statistics of a specific piece based on its owner (attackers/defenders) and ID.
+     * @param attackers - A boolean indicating if the piece belongs to attackers.
+     * @param id - The ID of the piece.
+     */
     public void add_kill(boolean attackers,int id){
         PieceStatistcs cur;
         if(attackers){

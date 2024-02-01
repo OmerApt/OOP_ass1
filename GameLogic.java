@@ -18,11 +18,20 @@ public class GameLogic implements PlayableLogic{
     }
 
 
-
+    /**
+     * Initializes the GameLogic instance and sets up the initial game state.
+     * This includes creating players, initializing the board, and placing pieces.
+     */
     public GameLogic(){
         setUpGame();
     }
 
+    /**
+     * Sets up the initial game state, including players, board, and pieces.
+     * If attacker or defender is not initialized, creates new instances.
+     * The current player is set to the attacker, and game statistics are initialized.
+     * The game is marked as not finished, and SetUpBoard is called to set up the board.
+     */
     private void setUpGame(){
        if(this.attacker == null)
        {this.attacker = new ConcretePlayer(true);}
@@ -33,6 +42,11 @@ public class GameLogic implements PlayableLogic{
         game_finished = false;
         SetUpBoard();
     }
+
+    /**
+     * Initializes the game board and sets up pieces for both players.
+     * Calls setDefendersPieces and setAttackersPieces to populate the board.
+     */
     private void SetUpBoard() {
         this.board = new ConcretePiece[boardsize][boardsize];
 
@@ -41,7 +55,13 @@ public class GameLogic implements PlayableLogic{
     }
 
 
-// player 2 pawns setup - defender
+
+    /**
+     * Sets up defender's pieces on the board, including pawns and a king.
+     * The pieces are placed at specific positions on the board, and their information is added to game statistics.
+     *  curr_id - The current ID assigned to the pieces.
+     *
+     */
 private void setDefendersPieces(){
     int curr_id = 1 ;
 
@@ -69,10 +89,17 @@ private void setDefendersPieces(){
     stats.addPieceToPos(board[5][7],new Position(5,7));
     }
 
-    private void setAttackersPieces(){
-        int curr_id = 1 ;
-        // player 1 pawns setup - attacker
 
+    /**
+     * Sets up pieces for the attacker on the game board.
+     * Places pawns and handles their specific positions, updating game statistics.
+     *  curr_id - The current ID assigned to the pieces.
+     */
+    private void setAttackersPieces(){
+
+        int curr_id = 1 ;
+
+        // Places attacker pawns in the leftmost column.
         for (int i = 3; i <= 7; i++) {
             board[i][0] = new Pawn(attacker,curr_id++);
             stats.addPieceToPos(board[i][0],new Position(i,0));
@@ -81,6 +108,7 @@ private void setDefendersPieces(){
         stats.addPieceToPos(board[5][1],new Position(5,1));
         for(int i=3;i<=7;i++){
             if(i==5){
+                // Places pawns and updates statistics for the central row.
                 board[0][i] = new Pawn(attacker,curr_id++);
                 stats.addPieceToPos(board[0][i] ,new Position(0,i));
                 board[1][i] = new Pawn(attacker,curr_id++);
@@ -90,12 +118,14 @@ private void setDefendersPieces(){
                 board[10][i] = new Pawn(attacker,curr_id++);
                 stats.addPieceToPos(board[10][i],new Position(10,i));
             }else{
+                // Places pawns and updates statistics for the edges.
                 board[0][i] = new Pawn(attacker,curr_id++);
                 stats.addPieceToPos(board[0][i],new Position(0,i));
                 board[10][i] = new Pawn(attacker,curr_id++);
                 stats.addPieceToPos(board[10][i],new Position(10,i));
             }
         }
+
         board[5][9]= new Pawn(attacker,curr_id++);
         stats.addPieceToPos(board[5][9],new Position(5,9));
         for (int i = 3; i <= 7; i++) {
@@ -104,6 +134,16 @@ private void setDefendersPieces(){
 
         }
     }
+
+
+
+    /**
+     * Moves a piece from position a to position b on the game board.
+     * Checks if the move is legal, updates the board, game statistics, and player turns accordingly.
+     * @param a - The starting position of the piece.
+     * @param b - The destination position for the piece.
+     * @return boolean - True if the move is legal, false otherwise.
+     */
     @Override
     public boolean move(Position a, Position b) {
         //System.out.println("check moving from:" + a.toString() + " to " + b.toString());
@@ -128,12 +168,19 @@ private void setDefendersPieces(){
         return legal;
     }
 
+
+    /**
+     * Handles the transition between player turns.
+     * If the game is finished, prints game statistics and declares the winner.
+     * Otherwise, switches the turn to the next player.
+     */
 private void handlePlayersTurn(){
        if(game_finished){
            this.currentlyPlaying.addWin();
            String text = stats.PrintGameStats(this.currentlyPlaying.equals(this.attacker));
            System.out.println(text);
        }else {
+           // Switches the turn to the next player.
            if(this.currentlyPlaying == this.attacker){
                this.currentlyPlaying = this.defender;
            }else{
@@ -142,19 +189,32 @@ private void handlePlayersTurn(){
        }
 
 }
+
+
+
+    /**
+     * Checks if a move from one position to another is legal.
+     * Validates the move based on piece ownership, type, and specific movement rules.
+     * @param from - The starting position of the piece.
+     * @param to - The destination position for the piece.
+     * @return boolean - True if the move is legal, false otherwise.
+     */
     private boolean isLegalMove (Position from,Position to ){
         Piece current = getPieceAtPosition(from);
 
+        // Checks if the piece belongs to the current player.
         if(current.getOwner() != this.currentlyPlaying){
             return false;
         }
 
+        // Ensures that pawns cannot move to the edge positions.
         if(Objects.equals(current.getType(), type_pawn) && isEdge(to)){
             return  false;
         }
 
 
         boolean is_same = ((from.getCol() == to.getCol()) && (from.getRow() == to.getRow()));
+        // Ensures that pawns cannot move to the edge positions.
         if ((from.getRow() != to.getRow() && from.getCol() != to.getCol() )|| is_same){
             return  false;
         }
@@ -165,6 +225,7 @@ private void handlePlayersTurn(){
             if (from.getCol()==to.getCol()){
                 diff=from.getRow()-to.getRow();
                 dir = (diff>0)?-1:1;
+                // Checks for pieces in the vertical path.
                 for(int i=from.getRow();i!=to.getRow();i+=dir){
                     next = board[i+dir][from.getCol()];
                     if(next != null)
@@ -173,6 +234,7 @@ private void handlePlayersTurn(){
             } else{
                 diff=from.getCol()-to.getCol();
                 dir = (diff>0)?-1:1;
+                // Checks for pieces in the horizontal path.
                 for(int i=from.getCol();i!=to.getCol();i+=dir){
                     next = board[from.getRow()][i+dir];
                     if(next != null)
@@ -183,7 +245,15 @@ private void handlePlayersTurn(){
         return true;
     }
 
-// if position a kills other players around him
+
+    /**
+     * Checks if a piece at a specified position is killed based on its surroundings.
+     * The method checks if the piece is in danger and determines if it should be killed.
+     * @param a - The position of the piece to check for being killed.
+     * direct - The direction to check for danger (VERTICAL or HORIZONTAL).
+     * @return int - 1 if the piece is killed, 0 otherwise.
+     */
+
     private void checkKills(Position a){
         Piece curr = getPieceAtPosition(a);
        if(curr == null|| Objects.equals(curr.getType(), type_king)){
@@ -216,10 +286,12 @@ private void handlePlayersTurn(){
         }else
         {
             if(p.getType()==type_king){
+                // Special handling for the king.
                 return isKingKilled(a)?2:0;
             }
             else switch (direct) {
                 case VERTICAL -> {
+                    // Checks for danger in both up and down directions.
                     boolean down_danger = isDanger(a, new Position(a.getRow(), a.getCol()+1));
                     boolean up_danger = isDanger(a, new Position(a.getRow(), a.getCol()-1));
                     if (up_danger && down_danger) {
@@ -227,6 +299,7 @@ private void handlePlayersTurn(){
                     }
                 }
                 case HORIZONTAL -> {
+                    // Checks for danger in both left and right directions.
                     boolean left_danger = isDanger(a, new Position(a.getRow()-1, a.getCol()));
                     boolean right_danger = isDanger(a, new Position(a.getRow()+1, a.getCol()));
                     if (left_danger && right_danger) {
@@ -237,7 +310,7 @@ private void handlePlayersTurn(){
 
             }
         }
-        // if no danger
+        // If no danger, the piece is not killed.
         return  0;
     }
 private boolean isKingKilled(Position a){
