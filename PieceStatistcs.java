@@ -47,7 +47,7 @@ public PieceStatistcs(int id ,String side){
 
     public void addMove(Position to){
     if(!move_history.isEmpty()){
-        Position last_pos = move_history.getLast();
+        Position last_pos = move_history.get(move_history.size()-1);
             distance+= calculate_distance(last_pos,to);
     }
         move_history.add(to);
